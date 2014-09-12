@@ -12,8 +12,8 @@
 # set toolchain
 ##############################################################################
 #export PATH=$(pwd)/$(your tool chain path)/bin:$PATH
-#export CROSS_COMPILE=$(your compiler prefix)
-#export ARCH=arm
+export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+export ARCH=arm
 
 ##############################################################################
 # make zImage
