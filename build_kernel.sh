@@ -1,29 +1,5 @@
 #!/bin/bash
-###############################################################################
-#
-#                           Kernel Build Script 
-#
-###############################################################################
-# 2014-08-06 p16009 : modified
-# 2011-10-24 effectivesky : modified
-# 2010-12-29 allydrop     : created
-###############################################################################
-##############################################################################
-# set toolchain
-##############################################################################
-#export PATH=$(pwd)/$(your tool chain path)/bin:$PATH
-export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
 export ARCH=arm
-
-##############################################################################
-# make zImage
-##############################################################################
-mkdir -p ./obj/KERNEL_OBJ/
-make ARCH=arm O=./obj/KERNEL_OBJ/ IM-A880S_defconfig
-make -j8 ARCH=arm O=./obj/KERNEL_OBJ/
-
-##############################################################################
-# Copy Kernel Image
-##############################################################################
-cp -f ./obj/KERNEL_OBJ/arch/arm/boot/zImage .
-
+export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+cp defconfig .config
+make -j4
