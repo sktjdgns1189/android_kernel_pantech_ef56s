@@ -58,14 +58,33 @@
 #include <mach/msm_smsm.h>
 #endif
 
+struct i2c_client *shared_client = NULL;
+
+#ifdef CONFIG_POWERSUSPEND
+#include <linux/powersuspend.h>
+static int mxt_suspend(struct i2c_client *client, pm_message_t mesg);
+static int mxt_resume(struct i2c_client *client);
+
+static void mxt_early_suspend(struct power_suspend *h)
+{
+	pm_message_t pm_null={0};
+	mxt_suspend(shared_client, pm_null);
+}
+static void mxt_late_resume(struct power_suspend *h)
+{
+	mxt_resume(shared_client);
+}
+static struct power_suspend mxt_power_suspend = {
+	.suspend = mxt_early_suspend,
+	.resume = mxt_late_resume,
+};
+#endif
 
 /* -------------------------------------------------------------------- */
 /* function proto type & variable for driver							*/
 /* -------------------------------------------------------------------- */
 static int __devinit mxt_probe(struct i2c_client *client, const struct i2c_device_id *id);
 static int __devexit mxt_remove(struct i2c_client *client);
-static int mxt_resume(struct i2c_client *client);
-static int mxt_suspend(struct i2c_client *client, pm_message_t mesg);
 #ifdef MXT_FIRMUP_ENABLE
 void	MXT_reprogram(void);
 uint8_t	MXT_Boot(bool withReset);
@@ -961,13 +980,6 @@ static long ts_fops_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 		  }
 		}
 		break;
-	case TOUCH_IOCTL_SUSPEND :
-	   mxt_suspend(NULL,pm_null);
-	   break;
-
-	case TOUCH_IOCTL_RESUME :
-		mxt_resume(NULL);
-		break;
 
 //++ p11309 - 2013.07.10 for Get Touch Mode
 	case TOUCH_IOCTL_MULTI_TSP_OBJECT_GET:
@@ -1518,14 +1530,6 @@ static long ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 		break;
 
-	case TOUCH_IOCTL_SUSPEND :
-	   mxt_suspend(NULL,pm_null);
-	   break;
-
-	case TOUCH_IOCTL_RESUME :
-	  mxt_resume(NULL);
-	  break;
-	  
 //++ p11309 - 2013.07.10 for Get Touch Mode
 	case TOUCH_IOCTL_MULTI_TSP_OBJECT_GET:
 
@@ -1569,12 +1573,6 @@ static int ioctl_debug(unsigned long arg)
 	pm_message_t pm_null={0};
 	switch (arg)
 	{
-	case IOCTL_DEBUG_SUSPEND:
-		mxt_suspend(NULL,pm_null);
-		break;
-	case IOCTL_DEBUG_RESUME:
-		mxt_resume(NULL);
-		break;
 // 	case IOCTL_DEBUG_GET_TOUCH_ANTITOUCH_INFO:
 // 		check_chip_calibration();
 // 		return get_touch_antitouch_info();
@@ -5022,6 +5020,10 @@ static int mxt_remove(struct i2c_client *client)
 		destroy_workqueue(mxt_fw30_wq);
 	kfree(mxt_fw30_data);        
 
+#ifdef CONFIG_POWERSUSPEND
+	unregister_power_suspend(&mxt_power_suspend);
+#endif
+
 	TSP_PowerOff();
 	dbg_func_out();
 	return 0;
@@ -5355,6 +5357,11 @@ static int __devinit mxt_probe(struct i2c_client *client, const struct i2c_devic
 	mxt_fw30_data->state = APPMODE;
 	dbg_hw("Atmel Max Touch Probe Complete!\n");
 	touch_probe_state=1;
+
+#ifdef CONFIG_POWERSUSPEND
+	register_power_suspend(&mxt_power_suspend);
+#endif
+
 	return 0;
 
 err_input_register_device_failed:
