@@ -373,12 +373,27 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks
+#// 20120105, albatros, imei 
+#ifeq ($(OEM_PRODUCT_MANUFACTURER),PANTECH)
+#LINUXINCLUDE += -I$(srctree)/../vendor/pantech/frameworks/sky_rawdata
+#endif
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
+
+
+######################################################################
+# PANTECH_KERNEL_FLAGS
+######################################################################
+KBUILD_CFLAGS += -DPROJECT_NAME=\"ef56s\"
+KBUILD_CFLAGS += -DPROJECT_NAME_UPPER=\"EF56S\"
+KBUILD_CFLAGS += -DMODEL_NAME=\"IM-A880S\"
+KBUILD_CFLAGS += -DPANTECH_BUILD_VER=\"S0221216\"
+KBUILD_CFLAGS += -DPANTECH_BOARD_VER=tp20
+KBUILD_CFLAGS += -DMSM8974_V22
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)

@@ -40,17 +40,6 @@ enum {
 
 #define SMEM_NUM_SMD_STREAM_CHANNELS        64
 
-/**
- * OVERFLOW_ADD_UNSIGNED() - check for unsigned overflow
- *
- * @type: type to check for overflow
- * @a: left value to use
- * @b: right value to use
- * @returns: true if a + b will result in overflow; false otherwise
- */
-#define OVERFLOW_ADD_UNSIGNED(type, a, b) \
-	(((type)~0 - (a)) < (b) ? true : false)
-
 enum {
 	/* fixed items */
 	SMEM_PROC_COMM = 0,
@@ -161,6 +150,22 @@ enum {
 	SMEM_FLASH_NAND_DEV_INFO, /* 471 */
 	SMEM_NUM_ITEMS,
 };
+
+#if defined(CONFIG_PANTECH_PMIC)
+typedef struct
+{
+    uint32_t  power_on_reason;
+    uint32_t  factory_cable_adc;
+    uint32_t  battery_id_adc;
+    uint32_t  hw_rev_adc;
+    uint32_t  power_on_mode;
+    uint8_t   silent_boot_mode;
+    uint32_t  hw_rev;
+    uint32_t  battery_id;
+    uint8_t   backlight_off;
+    uint32_t auto_power_on_soc_check;   //FEATURE_PANTECH_PMIC_AUTO_PWR_ON
+} oem_pm_smem_vendor1_data_type;
+#endif /* CONFIG_PANTECH_PMIC */
 
 #ifdef CONFIG_MSM_SMD
 void *smem_alloc(unsigned id, unsigned size);

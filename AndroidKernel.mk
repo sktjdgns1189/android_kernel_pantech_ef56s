@@ -19,7 +19,25 @@ DTS_NAMES ?= $(shell $(PERL) -e 'while (<>) {$$a = $$1 if /CONFIG_ARCH_((?:MSM|Q
 KERNEL_USE_OF ?= $(shell $(PERL) -e '$$of = "n"; while (<>) { if (/CONFIG_USE_OF=y/) { $$of = "y"; break; } } print $$of;' kernel/arch/arm/configs/$(KERNEL_DEFCONFIG))
 
 ifeq "$(KERNEL_USE_OF)" "y"
+ifeq ($(OEM_PRODUCT_MANUFACTURER),PANTECH)
+PANTECH_PRODUCT_MODEL := $(shell echo $(PROJECT_NAME) | tr A-Z a-z)
+PANTECH_BOARD_VERSION := $(shell echo $(PANTECH_BOARD_VER) | tr A-Z a-z)
+ifeq ($(MSM_VER),V30)
+ifeq ($(PANTECH_BOARD_VERSION),)
+DTS_FILES = $(wildcard $(TOP)/kernel/arch/arm/boot/dts/msm8974pro-ab-pm8941-$(PANTECH_PRODUCT_MODEL).dts)
+else
+DTS_FILES = $(wildcard $(TOP)/kernel/arch/arm/boot/dts/msm8974pro-ab-pm8941-$(PANTECH_PRODUCT_MODEL)-$(PANTECH_BOARD_VERSION).dts)
+endif
+else
+ifeq ($(PANTECH_BOARD_VERSION),)
+DTS_FILES = $(wildcard $(TOP)/kernel/arch/arm/boot/dts/msm8974-v2.2-$(PANTECH_PRODUCT_MODEL).dts)
+else
+DTS_FILES = $(wildcard $(TOP)/kernel/arch/arm/boot/dts/msm8974-v2.2-$(PANTECH_PRODUCT_MODEL)-$(PANTECH_BOARD_VERSION).dts)
+endif
+endif
+else
 DTS_FILES = $(wildcard $(TOP)/kernel/arch/arm/boot/dts/$(DTS_NAME)*.dts)
+endif
 DTS_FILE = $(lastword $(subst /, ,$(1)))
 DTB_FILE = $(addprefix $(KERNEL_OUT)/arch/arm/boot/,$(patsubst %.dts,%.dtb,$(call DTS_FILE,$(1))))
 ZIMG_FILE = $(addprefix $(KERNEL_OUT)/arch/arm/boot/,$(patsubst %.dts,%-zImage,$(call DTS_FILE,$(1))))
@@ -62,11 +80,17 @@ mpath=`dirname $$mdpath`; rm -rf $$mpath;\
 fi
 endef
 
+
 $(KERNEL_OUT):
 	mkdir -p $(KERNEL_OUT)
 
+ifeq ($(PANTECH_PERF_BUILD),true)	
+$(KERNEL_CONFIG): $(KERNEL_OUT)
+	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG) PERF_DEFCONFIG=msm8974_pantech_perf_defconfig
+else	
 $(KERNEL_CONFIG): $(KERNEL_OUT)
 	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG)
+endif	
 
 $(KERNEL_OUT)/piggy : $(TARGET_PREBUILT_INT_KERNEL)
 	$(hide) gunzip -c $(KERNEL_OUT)/arch/arm/boot/compressed/piggy.gzip > $(KERNEL_OUT)/piggy
@@ -78,6 +102,7 @@ $(TARGET_PREBUILT_INT_KERNEL): $(KERNEL_OUT) $(KERNEL_CONFIG) $(KERNEL_HEADERS_I
 	$(mv-modules)
 	$(clean-module-folder)
 	$(append-dtb)
+	$(exfat-module)
 
 $(KERNEL_HEADERS_INSTALL): $(KERNEL_OUT) $(KERNEL_CONFIG)
 	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- headers_install
@@ -87,7 +112,9 @@ kerneltags: $(KERNEL_OUT) $(KERNEL_CONFIG)
 
 kernelconfig: $(KERNEL_OUT) $(KERNEL_CONFIG)
 	env KCONFIG_NOTIMESTAMP=true \
-	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- menuconfig
+	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- xconfig
+#	env KCONFIG_NOTIMESTAMP=true \ #20130225 jylee modify menuconfig -> xconfig
+#	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- menuconfig
 	env KCONFIG_NOTIMESTAMP=true \
 	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- savedefconfig
 	cp $(KERNEL_OUT)/defconfig kernel/arch/arm/configs/$(KERNEL_DEFCONFIG)
