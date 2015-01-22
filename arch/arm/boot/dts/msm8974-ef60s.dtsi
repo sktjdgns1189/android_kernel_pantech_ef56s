@@ -72,7 +72,7 @@
         interrupts = <0 96 0>;
       interrupt-names = "qup_err_intr";
         qcom,i2c-bus-freq = <400000>;
-        qcom,i2c-src-freq = <50000000>;
+        qcom,i2c-src-freq = <19200000>;
         atmel_mxt_fw30@4a {
             compatible = "atmel,atmel_mxt_540s";
             reg = <0x4a>;
@@ -91,7 +91,7 @@
 		interrupts = <0 103 0>;
 		interrupt-names = "qup_err_intr";
 		qcom,i2c-bus-freq = <400000>;
-		qcom,i2c-src-freq = <50000000>;
+		qcom,i2c-src-freq = <19200000>;
 		qcom,scl-gpio = <&msmgpio 52 0>;
 		qcom,sda-gpio = <&msmgpio 51 0>;		
 		lp5523_led_driver@32 {
@@ -141,7 +141,7 @@
 			interrupts = <0 100 0>;
 			interrupt-names = "qup_err_intr"; 
 			qcom,i2c-bus-freq = <400000>;
-			qcom,i2c-src-freq = <50000000>; 
+			qcom,i2c-src-freq = <19200000>; 
 			pn547@28 {
 			compatible = "nxp,pn547";
 			reg = <0x28>;
