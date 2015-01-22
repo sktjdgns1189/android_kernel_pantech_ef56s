@@ -64,7 +64,7 @@
       interrupts = <0 96 0>;
       interrupt-names = "qup_err_intr";
       qcom,i2c-bus-freq = <400000>;
-      qcom,i2c-src-freq = <50000000>;
+      qcom,i2c-src-freq = <19200000>;
 
       atmel_mxt_fw21@4a {
       compatible = "atmel,atmel_mxt_540s";
@@ -94,7 +94,7 @@
         interrupts = <0 105 0>;
         interrupt-names = "qup_err_intr";
         qcom,i2c-bus-freq = <100000>;
-        qcom,i2c-src-freq = <50000000>;
+        qcom,i2c-src-freq = <19200000>;
         smb349-i2c@2D { // Slave driver and slave Address
             compatible = "smb349,smb349-i2c";// Manufacture , model
             reg = <0x2D>; // Slave Address
@@ -137,7 +137,7 @@
 			interrupts = <0 100 0>;
 			interrupt-names = "qup_err_intr"; 
 			qcom,i2c-bus-freq = <400000>;
-			qcom,i2c-src-freq = <50000000>; 
+			qcom,i2c-src-freq = <19200000>; 
 			pn544@28 {
 			compatible = "nxp,pn544";
 			reg = <0x28>;
